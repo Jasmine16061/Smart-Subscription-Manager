@@ -1,4 +1,8 @@
-let subscriptions = JSON.parse(localStorage.getItem('mySubscriptions')) || [];
+/* Backend API */
+const API_URL = 'http://localhost:5000/api';
+const CURRENT_USER_ID = 1; // Temporary test user ID from database
+
+let subscriptions = [];
 let myChart = null;
 
 /* Page Initialization */
@@ -8,8 +12,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const todayStr = new Date().toISOString().split('T')[0];
         dateInput.value = todayStr;
     }
-    updateUI();
+    
+    fetchSubscriptions(); // Fetch fresh data from MySQL backend on page load
 });
+
+/* Fetch Subscriptions from Backend (Read) */
+async function fetchSubscriptions() {
+    try {
+        const response = await fetch(`${API_URL}/subscriptions/${CURRENT_USER_ID}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const data = await response.json();
+        
+        // Map database naming conventions (snake_case) to frontend expectations
+        subscriptions = data.map(sub => ({
+            id: sub.id,
+            name: sub.name,
+            amount: parseFloat(sub.amount),
+            category: sub.category,
+            startDateStr: sub.start_date.split('T')[0], // Clean SQL Date string
+            expiryDateStr: sub.expiry_date.split('T')[0],
+            frequency: sub.frequency,
+            duration: sub.duration,
+            monthlyAvg: (sub.frequency === 'yearly') ? sub.amount / 12 : sub.amount
+        }));
+        
+        updateUI();
+    } catch (err) {
+        console.error("Failed to fetch subscriptions:", err);
+    }
+}
 
 /* Date Formatting Functions */
 function formatDateWithSpaces(dateStr) {
@@ -37,7 +69,7 @@ function updatePlaceholder() {
 }
 
 /* Add Subscription Function */
-document.getElementById('add-btn').addEventListener('click', () => {
+document.getElementById('add-btn').addEventListener('click', async () => {
     const name = document.getElementById('sub-name').value.trim();
     const amount = parseFloat(document.getElementById('sub-amount').value);
     const category = document.getElementById('sub-category').value;
@@ -48,26 +80,54 @@ document.getElementById('add-btn').addEventListener('click', () => {
     if (!name || isNaN(amount) || amount <= 0) return;
 
     const expiryDateStr = calculateExpiry(startDateStr, frequency, duration);
-    const newSub = {
-        id: Date.now(),
-        name, amount, category, startDateStr, expiryDateStr, frequency, duration,
-        monthlyAvg: (frequency === 'yearly') ? amount / 12 : amount
+
+    // Prepare data payload for backend API
+    const newSubData = {
+        user_id: CURRENT_USER_ID,
+        name,
+        amount,
+        category,
+        startDateStr,
+        expiryDateStr,
+        frequency,
+        duration
     };
 
-    subscriptions.push(newSub);
-    saveAndRefresh();
-    document.getElementById('sub-name').value = '';
-    document.getElementById('sub-amount').value = '';
+    try {
+        const response = await fetch(`${API_URL}/subscriptions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newSubData)
+        });
+        
+        if (response.ok) {
+            // Clear inputs and refresh data from server
+            document.getElementById('sub-name').value = '';
+            document.getElementById('sub-amount').value = '';
+            fetchSubscriptions(); 
+        } else {
+            console.error("Server refused to add subscription");
+        }
+    } catch (err) {
+        console.error("Error sending data to server:", err);
+    }
 });
 
-function deleteSub(id) {
-    subscriptions = subscriptions.filter(sub => sub.id !== id);
-    saveAndRefresh();
-}
-
-function saveAndRefresh() {
-    localStorage.setItem('mySubscriptions', JSON.stringify(subscriptions));
-    updateUI();
+/* Delete Subscription Function (Delete) */
+async function deleteSub(id) {
+    try {
+        const response = await fetch(`${API_URL}/subscriptions/${id}`, {
+            method: 'DELETE'
+        });
+        if (response.ok) {
+            // Refresh list from server after deletion
+            fetchSubscriptions();
+        } else {
+            console.error("Server refused to delete item");
+        }
+    } catch (err) {
+        console.error("Error deleting subscription:", err);
+    }
 }
 
 function getNextBilling(sub, today) {
