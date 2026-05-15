@@ -1,0 +1,167 @@
+:root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --danger: #ef4444;
+    --bg-page: #f1f5f9;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* --- Main Page Layout --- */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-page);
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.container {
+    background: white;
+    width: 100%;
+    max-width: 580px; 
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+}
+
+/* Header & Dashboard */
+header {
+    background: linear-gradient(135deg, #1e293b 0%, #4338ca 100%);
+    padding: 40px 30px;
+    color: white;
+    text-align: center;
+}
+
+.center-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 25px;
+}
+
+.dashboard {
+    display: flex;
+    gap: 12px;
+}
+
+.summary-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-card h3 { font-size: 0.7rem; text-transform: uppercase; color: #cbd5e1; }
+.summary-card p { font-size: 1.4rem; font-weight: 800; }
+
+/* Section & Chart Styles */
+section { padding: 0 30px; }
+.analysis-section { margin-top: -25px; }
+
+.chart-container {
+    background: white;
+    padding: 15px;
+    border-radius: 22px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+    max-width: 200px;
+    margin: 0 auto 30px;
+}
+
+/* Input Form Styles */
+.input-group {
+    background: #f8fafc;
+    padding: 24px;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+input, select {
+    padding: 12px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 13px;
+    outline: none;
+}
+
+button {
+    background: var(--primary);
+    color: white;
+    padding: 15px;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+}
+
+button:hover { background: var(--primary-hover); }
+
+/* Subscription Card Styles */
+.list-header { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; color: var(--text-main); }
+
+.sub-item {
+    list-style: none;
+    background: white;
+    border: 1px solid #f1f5f9;
+    padding: 22px; /* 增加內距讓卡片不擠 */
+    border-radius: 24px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.sub-item:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(0,0,0,0.05); }
+
+.category-tag {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--primary);
+    background: #eef2ff;
+    padding: 4px 10px;
+    border-radius: 8px;
+    text-transform: uppercase;
+}
+
+.name { font-weight: 800; font-size: 1.2rem; margin-top: 8px; display: block; }
+
+.details { 
+    font-size: 13px; 
+    color: var(--text-muted); 
+    margin-top: 8px; 
+    line-height: 1.8; 
+}
+
+/* Warning & Expired States */
+.warning-card { 
+    border: 2px solid var(--danger) !important; 
+    background-color: #fffafb !important; 
+}
+.warning-text { color: var(--danger); font-weight: 700; }
+
+.expired-card {
+    background-color: #f8fafc !important;
+    border: 1px dashed #cbd5e1 !important;
+    filter: grayscale(1); 
+}
+
+/* Price & Delete Button */
+.sub-price { text-align: right; }
+
+.sub-price strong { font-size: 1.4rem; font-weight: 800; display: block; }
+
+.delete-btn { color: #cbd5e1; cursor: pointer; margin-left: 20px; font-size: 1.3rem; transition: 0.2s; }
+.delete-btn:hover { color: var(--danger); }

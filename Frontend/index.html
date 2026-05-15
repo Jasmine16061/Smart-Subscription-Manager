@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Track</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="center-title">Subscription Track</h1>
+            <div class="dashboard">
+                <div class="summary-card">
+                    <h3>Monthly Avg.</h3>
+                    <p id="total-cost-month">$ 0</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Yearly Total</h3>
+                    <p id="total-cost-year">$ 0</p>
+                </div>
+            </div>
+        </header>
+
+        <div id="error-container" style="display: none;">
+            <p id="error-msg"></p>
+        </div>
+
+        <section class="analysis-section">
+            <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <div class="input-group">
+                <div class="input-grid">
+                    <input type="text" id="sub-name" placeholder="Subscription Name">
+                    <input type="number" id="sub-amount" placeholder="Amount">
+                    
+                    <select id="sub-category">
+                        <option value="Streaming">Streaming</option>
+                        <option value="Digital Services">Digital Services</option>
+                        <option value="Food Delivery">Food Delivery</option>
+                        <option value="Network">Network & Mobile</option>
+                        <option value="Education">Education</option>
+                        <option value="Lifestyle">Lifestyle</option>
+                    </select>
+                    <input type="date" id="sub-date" title="Start Date">
+                    
+                    <select id="sub-frequency" onchange="updatePlaceholder()">
+                        <option value="monthly">Monthly Plan</option>
+                        <option value="yearly">Yearly Plan</option>
+                    </select>
+                    </select>
+                    <input type="number" id="sub-duration" placeholder="Duration (Qty)">
+                </div>
+                <button id="add-btn">Add Subscription</button>
+            </div>
+        </section>
+
+        <section class="list-section">
+            <div class="list-header">Active Subscriptions</div>
+            <ul id="sub-list"></ul>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
