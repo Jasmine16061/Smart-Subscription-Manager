@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api/auth';
+const API_BASE = 'https://smart-subscription-manager-production-8e6d.up.railway.app/api/auth';
 
 function toggleAuthView(view) {
     if (view === 'login') {

@@ -1,5 +1,5 @@
 /* Backend API */
-const API_URL = 'http://localhost:5001/api';
+const API_URL = 'https://smart-subscription-manager-production-8e6d.up.railway.app/api';
 
 // Check auth token
 const token = localStorage.getItem('token');
