@@ -1,6 +1,16 @@
 /* Backend API */
-const API_URL = 'http://localhost:5000/api';
-const CURRENT_USER_ID = 1; // Temporary test user ID from database
+const API_URL = 'http://localhost:5001/api';
+
+// Check auth token
+const token = localStorage.getItem('token');
+if (!token) {
+    window.location.href = 'login.html';
+}
+
+const authHeaders = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+};
 
 let subscriptions = [];
 let myChart = null;
@@ -12,18 +22,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const todayStr = new Date().toISOString().split('T')[0];
         dateInput.value = todayStr;
     }
-    
+
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        });
+    }
+
     fetchSubscriptions(); // Fetch fresh data from MySQL backend on page load
 });
 
 /* Fetch Subscriptions from Backend (Read) */
 async function fetchSubscriptions() {
     try {
-        const response = await fetch(`${API_URL}/subscriptions/${CURRENT_USER_ID}`);
+        const response = await fetch(`${API_URL}/subscriptions`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+            return;
+        }
         if (!response.ok) throw new Error('Network response was not ok');
-        
+
         const data = await response.json();
-        
+
         // Map database naming conventions (snake_case) to frontend expectations
         subscriptions = data.map(sub => ({
             id: sub.id,
@@ -36,7 +61,7 @@ async function fetchSubscriptions() {
             duration: sub.duration,
             monthlyAvg: (sub.frequency === 'yearly') ? sub.amount / 12 : sub.amount
         }));
-        
+
         updateUI();
     } catch (err) {
         console.error("Failed to fetch subscriptions:", err);
@@ -46,7 +71,7 @@ async function fetchSubscriptions() {
 /* Date Formatting Functions */
 function formatDateWithSpaces(dateStr) {
     if (!dateStr) return "";
-    let clean = dateStr.replace(/[\/-]/g, '-'); 
+    let clean = dateStr.replace(/[\/-]/g, '-');
     let parts = clean.split('-');
     if (parts.length < 3) return dateStr;
     return `${parts[0]} / ${parts[1]} / ${parts[2]}`;
@@ -83,7 +108,6 @@ document.getElementById('add-btn').addEventListener('click', async () => {
 
     // Prepare data payload for backend API
     const newSubData = {
-        user_id: CURRENT_USER_ID,
         name,
         amount,
         category,
@@ -96,15 +120,15 @@ document.getElementById('add-btn').addEventListener('click', async () => {
     try {
         const response = await fetch(`${API_URL}/subscriptions`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders,
             body: JSON.stringify(newSubData)
         });
-        
+
         if (response.ok) {
             // Clear inputs and refresh data from server
             document.getElementById('sub-name').value = '';
             document.getElementById('sub-amount').value = '';
-            fetchSubscriptions(); 
+            fetchSubscriptions();
         } else {
             console.error("Server refused to add subscription");
         }
@@ -117,7 +141,8 @@ document.getElementById('add-btn').addEventListener('click', async () => {
 async function deleteSub(id) {
     try {
         const response = await fetch(`${API_URL}/subscriptions/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
             // Refresh list from server after deletion
@@ -145,9 +170,9 @@ function updateUI() {
     const list = document.getElementById('sub-list');
     list.innerHTML = '';
     let totalMonthly = 0;
-    let totalYearlyTotal = 0; 
+    let totalYearlyTotal = 0;
     let categoryData = {};
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const currentYear = today.getFullYear();
@@ -199,7 +224,7 @@ function updateUI() {
         /* Create Subscription Card */
         const li = document.createElement('li');
         li.className = `sub-item ${isWarning ? 'warning-card' : ''} ${isExpired ? 'expired-card' : ''}`;
-        
+
         li.innerHTML = `
             <div style="${isExpired ? 'opacity: 0.6;' : ''}">
                 <span class="category-tag">${sub.category}</span>
